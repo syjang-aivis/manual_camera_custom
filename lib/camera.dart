@@ -408,22 +408,11 @@ class CameraController extends ValueNotifier<CameraValue> {
     }
   }
 
-  /// Captures an image and saves it to [path].
-  ///
-  /// A path can for example be obtained using
-  /// [path_provider](https://pub.dartlang.org/packages/path_provider).
-  ///
-  /// If a file already exists at the provided path an error will be thrown.
-  /// The file can be read as this function returns.
+  /// Captures an image and returns the file where it was saved.
   ///
   /// Throws a [CameraException] if the capture fails.
-  Future<void> takePicture(String path) async {
-    if (!value.isInitialized || _isDisposed) {
-      throw CameraException(
-        'Uninitialized CameraController.',
-        'takePicture was called on uninitialized CameraController',
-      );
-    }
+  Future<XFile> takePicture() async {
+    _throwIfNotInitialized('takePicture');
     if (value.isTakingPicture) {
       throw CameraException(
         'Previous capture has not returned yet.',
@@ -432,11 +421,9 @@ class CameraController extends ValueNotifier<CameraValue> {
     }
     try {
       value = value.copyWith(isTakingPicture: true);
-      await _channel.invokeMethod<void>(
-        'takePicture',
-        <String, dynamic>{'textureId': _textureId, 'path': path},
-      );
+      final XFile file = await CameraPlatform.instance.takePicture(_cameraId);
       value = value.copyWith(isTakingPicture: false);
+      return file;
     } on PlatformException catch (e) {
       value = value.copyWith(isTakingPicture: false);
       throw CameraException(e.code, e.message);
