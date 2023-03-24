@@ -411,7 +411,7 @@ class CameraController extends ValueNotifier<CameraValue> {
   /// Captures an image and returns the file where it was saved.
   ///
   /// Throws a [CameraException] if the capture fails.
-  Future<XFile> takePicture() async {
+  Future<void> takePicture() async {
     _throwIfNotInitialized('takePicture');
     if (value.isTakingPicture) {
       throw CameraException(
